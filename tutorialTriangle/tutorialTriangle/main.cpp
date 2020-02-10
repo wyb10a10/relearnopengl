@@ -9,6 +9,10 @@
 #include <iostream>
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include "Shader.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -77,7 +81,46 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     
-    int vshader = glCreateShader(GL_VERTEX_SHADER);
+    // 创建纹理对象
+    unsigned int texture, texture2;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // 为当前绑定的纹理对象设置环绕、过滤方式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // 加载纹理数据
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
+    // 卸载纹理数据
+    stbi_image_free(data);
+    
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // 解决笑脸翻转问题
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    stbi_image_free(data);
+
+    /*int vshader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vshader, 1, &vertexShaderSource, NULL);
     glCompileShader(vshader);
     int success = 0;
@@ -107,7 +150,13 @@ int main(int argc, const char * argv[]) {
     if (!success) {
         glGetProgramInfoLog(program, sizeof(infoLog), NULL, infoLog);
         std::cout << infoLog << std::endl;
-    }
+    }*/
+    
+    Shader shader("shaders/color_texture.vert", "shaders/color_texture.frag");
+
+    shader.use();
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
     
     // 三角形顶点
     /*float vertices[] = {
@@ -117,11 +166,20 @@ int main(int argc, const char * argv[]) {
     };*/
     
     // 矩形顶点
-    float vertices[] = {
+    /*float vertices[] = {
         0.5f, 0.5f, 0.0f,   // 右上角
         0.5f, -0.5f, 0.0f,  // 右下角
         -0.5f, -0.5f, 0.0f, // 左下角
         -0.5f, 0.5f, 0.0f   // 左上角
+    };*/
+    
+    // 位置颜色纹理uv
+    float vertices[] = {
+    //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
     };
 
     unsigned int indices[] = { // 注意索引从0开始!
@@ -139,17 +197,29 @@ int main(int argc, const char * argv[]) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
     
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(program);
+        //glUseProgram(program);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+        
+        glBindVertexArray(vao);
+        shader.use();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
