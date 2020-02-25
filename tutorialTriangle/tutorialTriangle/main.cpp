@@ -11,6 +11,10 @@
 #include <GLFW/glfw3.h>
 #include "Shader.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -27,19 +31,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
 
 void processInput(GLFWwindow *window)
 {
@@ -119,40 +110,8 @@ int main(int argc, const char * argv[]) {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     stbi_image_free(data);
-
-    /*int vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vshader);
-    int success = 0;
-    char infoLog[512];
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vshader, sizeof(infoLog), NULL, infoLog);
-        std::cout << infoLog << std::endl;
-    }
     
-    int fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fshader);
-    glGetShaderiv(fshader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fshader, sizeof(infoLog), NULL, infoLog);
-        std::cout << infoLog << std::endl;
-    }
-    
-    int program = glCreateProgram();
-    glAttachShader(program, vshader);
-    glAttachShader(program, fshader);
-    glLinkProgram(program);
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
-    if (!success) {
-        glGetProgramInfoLog(program, sizeof(infoLog), NULL, infoLog);
-        std::cout << infoLog << std::endl;
-    }*/
-    
-    Shader shader("shaders/color_texture.vert", "shaders/color_texture.frag");
+    Shader shader("shaders/color_texture_mat.vert", "shaders/color_texture_mat.frag");
 
     shader.use();
     shader.setInt("texture1", 0);
@@ -211,13 +170,22 @@ int main(int argc, const char * argv[]) {
         glClear(GL_COLOR_BUFFER_BIT);
         //glUseProgram(program);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
+        
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
         
-        glBindVertexArray(vao);
         shader.use();
+        
+        unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        
+        glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
         glfwPollEvents();

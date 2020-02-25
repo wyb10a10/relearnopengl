@@ -36,6 +36,7 @@
 		7420A50923EF0B53005C603B /* libglfw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libglfw3.a; path = ../../../../../usr/local/lib/libglfw3.a; sourceTree = "<group>"; };
 		748D5AC723F1A3F9000D84A1 /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		748D5AC823F1A7DB000D84A1 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
+		748D5AC924042E25000D84A1 /* glm */ = {isa = PBXFileReference; lastKnownFileType = folder; path = glm; sourceTree = "<group>"; };
 		74F0A9B123EF0F0100CBECE5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		74F0A9B323EF0F5A00CBECE5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		74F0A9B523EF0FF800CBECE5 /* glad */ = {isa = PBXFileReference; lastKnownFileType = folder; name = glad; path = ../glad; sourceTree = "<group>"; };
@@ -81,6 +82,7 @@
 		7420A4FC23EF030F005C603B /* tutorialTriangle */ = {
 			isa = PBXGroup;
 			children = (
+				748D5AC924042E25000D84A1 /* glm */,
 				74F0A9B623EF9BC100CBECE5 /* glad.c */,
 				7420A4FD23EF030F005C603B /* main.cpp */,
 				74F0A9B823F1832500CBECE5 /* Shader.h */,
