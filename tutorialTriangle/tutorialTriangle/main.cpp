@@ -39,6 +39,13 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
 
+bool firstMouse = true;
+float yaw   = -90.0f;
+float pitch =  0.0f;
+float lastX =  800.0f / 2.0;
+float lastY =  600.0 / 2.0;
+float fov   =  45.0f;
+
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -54,6 +61,39 @@ void processInput(GLFWwindow *window)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if(firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw   += xoffset;
+    pitch += yoffset;
+
+    if(pitch > 89.0f)
+        pitch = 89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
 }
 
 int main(int argc, const char * argv[]) {
@@ -89,7 +129,9 @@ int main(int argc, const char * argv[]) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
+
     // 创建纹理对象
     unsigned int texture, texture2;
     glGenTextures(1, &texture);
@@ -255,7 +297,6 @@ int main(int argc, const char * argv[]) {
         lastFrame = currentFrame;
         
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
 
         //glm::mat4 view = glm::mat4(1.0f);
         //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
