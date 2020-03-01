@@ -129,7 +129,8 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader ourShader("shaders/model.vs", "shaders/model.fs");
+    //Shader ourShader("shaders/model.vs", "shaders/model.fs");
+    Shader ourShader("shaders/reflect.vs", "shaders/reflect.fs");
     Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
 
     // 设置天空盒的缓冲区
@@ -148,6 +149,11 @@ int main()
     // load models
     // -----------
     Model ourModel("objects/nanosuit/nanosuit.obj");
+    
+    ourShader.use();
+    ourShader.setInt("skybox", 0);
+    skyboxShader.use();
+    skyboxShader.setInt("skybox", 0);
     
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
