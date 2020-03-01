@@ -129,9 +129,11 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader ourShader("shaders/model.vs", "shaders/model.fs", "shaders/explode.gs");
+    //Shader ourShader("shaders/model.vs", "shaders/model.fs", "shaders/explode.gs");
+    Shader ourShader("shaders/model.vs", "shaders/model.fs");
     //Shader ourShader("shaders/reflect.vs", "shaders/reflect.fs");
     Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
+    Shader testNormal("shaders/testnormal.vs", "shaders/testnormal.fs", "shaders/testnormal.gs");
 
     // 设置天空盒的缓冲区
     unsigned int skyboxVAO, skyboxVBO;
@@ -150,8 +152,8 @@ int main()
     // -----------
     Model ourModel("objects/nanosuit/nanosuit.obj");
     
-    //ourShader.use();
-    //ourShader.setInt("skybox", 0);
+    ourShader.use();
+    ourShader.setInt("skybox", 0);
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
     
@@ -186,7 +188,7 @@ int main()
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         //ourShader.setVec3("cameraPos", camera.Position);
-        ourShader.setFloat("time", glfwGetTime());
+        //ourShader.setFloat("time", glfwGetTime());
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
@@ -194,6 +196,12 @@ int main()
         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
+        
+        testNormal.use();
+        testNormal.setMat4("projection", projection);
+        testNormal.setMat4("view", view);
+        testNormal.setMat4("model", model);
+        ourModel.Draw(testNormal);
 
         // 最后渲染天空盒
         glDepthFunc(GL_LEQUAL);
