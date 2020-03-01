@@ -129,8 +129,8 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    //Shader ourShader("shaders/model.vs", "shaders/model.fs");
-    Shader ourShader("shaders/reflect.vs", "shaders/reflect.fs");
+    Shader ourShader("shaders/model.vs", "shaders/model.fs", "shaders/explode.gs");
+    //Shader ourShader("shaders/reflect.vs", "shaders/reflect.fs");
     Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
 
     // 设置天空盒的缓冲区
@@ -150,8 +150,8 @@ int main()
     // -----------
     Model ourModel("objects/nanosuit/nanosuit.obj");
     
-    ourShader.use();
-    ourShader.setInt("skybox", 0);
+    //ourShader.use();
+    //ourShader.setInt("skybox", 0);
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
     
@@ -185,7 +185,8 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
-        ourShader.setVec3("cameraPos", camera.Position);
+        //ourShader.setVec3("cameraPos", camera.Position);
+        ourShader.setFloat("time", glfwGetTime());
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
