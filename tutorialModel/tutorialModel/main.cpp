@@ -85,6 +85,58 @@ float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
+void rotateArbitraryLine(glm::mat4& pOut, const glm::vec3& v1, const glm::vec3& v2, float theta)
+{
+    float a = v1.x;
+    float b = v1.y;
+    float c = v1.z;
+
+    glm::vec3 p = v2 - v1;
+    p = glm::normalize(p);
+    float u = p.x;
+    float v = p.y;
+    float w = p.z;
+
+    float uu = u * u;
+    float uv = u * v;
+    float uw = u * w;
+    float vv = v * v;
+    float vw = v * w;
+    float ww = w * w;
+    float au = a * u;
+    float av = a * v;
+    float aw = a * w;
+    float bu = b * u;
+    float bv = b * v;
+    float bw = b * w;
+    float cu = c * u;
+    float cv = c * v;
+    float cw = c * w;
+
+    float costheta = cosf(theta);
+    float sintheta = sinf(theta);
+
+    pOut[0][0] = uu + (vv + ww) * costheta;
+    pOut[0][1] = uv * (1 - costheta) + w * sintheta;
+    pOut[0][2] = uw * (1 - costheta) - v * sintheta;
+    pOut[0][3] = 0;
+
+    pOut[1][0] = uv * (1 - costheta) - w * sintheta;
+    pOut[1][1] = vv + (uu + ww) * costheta;
+    pOut[1][2] = vw * (1 - costheta) + u * sintheta;
+    pOut[1][3] = 0;
+
+    pOut[2][0] = uw * (1 - costheta) + v * sintheta;
+    pOut[2][1] = vw * (1 - costheta) - u * sintheta;
+    pOut[2][2] = ww + (uu + vv) * costheta;
+    pOut[2][3] = 0;
+
+    pOut[3][0] = (a * (vv + ww) - u * (bv + cw)) * (1 - costheta) + (bw - cv) * sintheta;
+    pOut[3][1] = (b * (uu + ww) - v * (au + cw)) * (1 - costheta) + (cu - aw) * sintheta;
+    pOut[3][2] = (c * (uu + vv) - w * (au + bv)) * (1 - costheta) + (av - bu) * sintheta;
+    pOut[3][3] = 1;
+}
+
 int main()
 {
     // glfw: initialize and configure
@@ -136,10 +188,10 @@ int main()
     //Shader testNormal("shaders/testnormal.vs", "shaders/testnormal.fs", "shaders/testnormal.gs");
     Shader shader("shaders/model.vs", "shaders/model.fs");
     Shader asteroidShader("shaders/modelinstance.vs", "shaders/model.fs");
-
+    
+    srand(glfwGetTime()); // 初始化随机种子
     unsigned int amount = 10000;
     glm::mat4 *modelMatrices = new glm::mat4[amount];
-    srand(glfwGetTime()); // 初始化随机种子
     float radius = 150.0;
     float offset = 25.0f;
     for (unsigned int i = 0; i < amount; i++)
@@ -166,6 +218,7 @@ int main()
         // 4. now add to list of matrices
         modelMatrices[i] = model;
     }
+    
     // 设置天空盒的缓冲区
    /* unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -262,9 +315,13 @@ int main()
         shader.setMat4("model", model);
         planet.Draw(shader);
 
+        glm::mat4 rotateMat;
+        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+        
         // draw meteorites
         asteroidShader.use();
         asteroidShader.setInt("texture_diffuse1", 0);
+        asteroidShader.setMat4("rotateMat", rotateMat);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rock.textures_loaded[0].id); // note: we also made the textures_loaded vector public (instead of private) from the model class.
         for (unsigned int i = 0; i < rock.meshes.size(); i++)
