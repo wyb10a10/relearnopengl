@@ -316,12 +316,17 @@ int main()
         planet.Draw(shader);
 
         glm::mat4 rotateMat;
-        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
         
         // draw meteorites
         asteroidShader.use();
         asteroidShader.setInt("texture_diffuse1", 0);
-        asteroidShader.setMat4("rotateMat", rotateMat);
+        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+        asteroidShader.setMat4("rotateMat[0]", rotateMat);
+        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.5f);
+        asteroidShader.setMat4("rotateMat[1]", rotateMat);
+        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.8f);
+        asteroidShader.setMat4("rotateMat[2]", rotateMat);
+        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rock.textures_loaded[0].id); // note: we also made the textures_loaded vector public (instead of private) from the model class.
         for (unsigned int i = 0; i < rock.meshes.size(); i++)

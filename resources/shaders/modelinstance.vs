@@ -7,10 +7,10 @@ out vec2 TexCoords;
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 rotateMat;
+uniform mat4 rotateMat[3];
 
 void main()
 {
     TexCoords = aTexCoords;
-    gl_Position = projection * view * rotateMat * aInstanceMatrix * vec4(aPos, 1.0f);
+    gl_Position = projection * view * rotateMat[gl_InstanceID % 3] * aInstanceMatrix * vec4(aPos, 1.0f);
 }
