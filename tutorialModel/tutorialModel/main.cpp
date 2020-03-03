@@ -315,16 +315,20 @@ int main()
         shader.setMat4("model", model);
         planet.Draw(shader);
 
-        glm::mat4 rotateMat;
-        
+        glm::mat4 rotateMat = glm::mat4(1.0f);
         // draw meteorites
         asteroidShader.use();
         asteroidShader.setInt("texture_diffuse1", 0);
-        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
+        rotateMat = glm::rotate(rotateMat, (float)(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        //rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime());
         asteroidShader.setMat4("rotateMat[0]", rotateMat);
-        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.5f);
+        rotateMat = glm::mat4(1.0f);
+        rotateMat = glm::rotate(rotateMat, (float)(glfwGetTime() * 0.5f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.5f);
         asteroidShader.setMat4("rotateMat[1]", rotateMat);
-        rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.8f);
+        rotateMat = glm::mat4(1.0f);
+        rotateMat = glm::rotate(rotateMat, (float)(glfwGetTime() * 0.8f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //rotateArbitraryLine(rotateMat, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glfwGetTime() * 0.8f);
         asteroidShader.setMat4("rotateMat[2]", rotateMat);
         
         glActiveTexture(GL_TEXTURE0);
